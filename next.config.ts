@@ -13,8 +13,6 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**.ibb.co" },
     ],
   },
-  // Don't fail prod builds on lint warnings — keep dev strict via `npm run lint`
-  eslint: { ignoreDuringBuilds: true },
   // Keep mongodb-memory-server out of the server bundle — it's only used in dev
   // when MONGODB_URI is a placeholder. In production it's never resolved.
   serverExternalPackages: ["mongodb-memory-server"],
