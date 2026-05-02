@@ -31,13 +31,21 @@ async function resolveUri(): Promise<string> {
     return RAW_URI;
   }
   // Fallback to in-memory MongoDB so the app runs without external setup
-  console.warn("⚠️  MONGODB_URI is a placeholder — falling back to in-memory MongoDB (data will not persist across restarts)");
-  const { MongoMemoryServer } = await import("mongodb-memory-server");
-  const mem = await MongoMemoryServer.create();
-  cached.memoryServer = mem;
-  cached.uri = mem.getUri();
-  console.log("🟢  In-memory MongoDB ready at", cached.uri);
-  return cached.uri;
+  // Only available in local dev (where mongodb-memory-server is installed as a devDependency).
+  console.warn("⚠️  MONGODB_URI is a placeholder — attempting in-memory MongoDB fallback (dev only)");
+  try {
+    const mod = await import("mongodb-memory-server");
+    const mem = await mod.MongoMemoryServer.create();
+    cached.memoryServer = mem;
+    cached.uri = mem.getUri();
+    console.log("🟢  In-memory MongoDB ready at", cached.uri);
+    return cached.uri;
+  } catch (err) {
+    throw new Error(
+      "MONGODB_URI is not configured and the in-memory fallback is not available. " +
+        "Set a real MongoDB connection string in your environment variables (e.g. MongoDB Atlas)."
+    );
+  }
 }
 
 export async function connectDB() {
